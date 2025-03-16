@@ -3,20 +3,24 @@
 #include <GLFW/glfw3.h>
 #include "MyLog.h"
 #include "utils/ShaderUtils.h"
+#include <stb_image.h>
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
     LOGI("called");
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window)
+{
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
 }
 
 
-int main() {
+int main()
+{
     // 使用GLFW前需要init
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -39,30 +43,70 @@ int main() {
     }
 
     Shader shader{"../src/VertexShader.glsl", "../src/FragmentShader.glsl"};
+    shader.use();
 
+    // VAO用来配置顶点的属性, 本身并不存储顶点
+    unsigned int VAO; // 顶点数组对象：Vertex Array Object，VAO
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);  // 放置到某种类型的槽位上，直接通过函数名指定
+
+    // VBO
     float vertices[] = {
-            // 位置              // 颜色
-            0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
-            -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
-            0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
+            // positions          // colors           // texture coords
+            0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+            0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
     };
+    // 不是必须使用VBO，这只是CPU->GPU的一个过程，画之前需要穿一次数据给GPU。这里预先传给GPU方便后续直接使用。
     unsigned int VBO; // 顶点缓冲对象：Vertex Buffer Object，VBO
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO); // 放置到某种类型的槽位上
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // 针对某种类型的槽位里面的东西做操作
 
-    shader.use();
+    // EBO
+    unsigned int indices[] = {
+            // 注意索引从0开始!
+            // 此例的索引(0,1,2,3)就是顶点数组vertices的下标，
+            // 这样可以由下标代表顶点组合成矩形
 
-    // 不是必须使用VAO，这只是CPU->GPU的一个过程，画之前需要穿一次数据给GPU。这里预先传给GPU方便后续直接使用。
-    unsigned int VAO; // 顶点数组对象：Vertex Array Object，VAO
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);  // 放置到某种类型的槽位上，直接通过函数名指定
-    // 位置属性
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+            0, 1, 3, // 第一个三角形
+            1, 2, 3  // 第二个三角形
+    };
+    unsigned int EBO; // 元素缓冲对象：Element Buffer Object，EBO 存储 OpenGL 用来决定要绘制哪些顶点的索引 或 索引缓冲对象 Index Buffer Object，IBO
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // 放置到某种类型的槽位上
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); // 针对某种类型的槽位里面的东西做操作
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-// 颜色属性
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    // color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    // texture coord attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // Texture
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("../src/assets/container.jpg", &width, &height, &nrChannels, 0);
+    if (data != nullptr) {
+        LOGI("load png successfully, w={} h={} nrChannels={}", width, height, nrChannels);
+    }
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // 纹理超出后的环绕方式 S T R 类似 X Y Z
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    // 纹理缩放后的采样方式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data);
+
 
 
     while (!glfwWindowShouldClose(window)) {
@@ -76,8 +120,9 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // 设置状态：清除后的颜色是什么？
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3); // glDrawArrays 会使用glBindVertexArray这个槽位里的东西
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // glDrawElements 会使用glBindVertexArray和GL_ELEMENT_ARRAY_BUFFER 这两个槽位里的东西
 
         // 检查并调用事件，交换缓冲
         glfwPollEvents();

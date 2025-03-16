@@ -32,12 +32,20 @@ int DrawRectangle()
     glBindBuffer(GL_ARRAY_BUFFER, VBO); // 放置到某种类型的槽位上
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // 针对某种类型的槽位里面的东西做操作
 
+    /**
+     * 当VAO被绑定时，任何对EBO的绑定操作（即对GL_ELEMENT_ARRAY_BUFFER的绑定操作）都会被记录在当前绑定的VAO中。
+     * 因此，只要VAO保持绑定，所有对EBO的绑定状态更改都会与当前的VAO关联。
+     */
     unsigned int EBO; // 元素缓冲对象：Element Buffer Object，EBO 存储 OpenGL 用来决定要绘制哪些顶点的索引 或 索引缓冲对象 Index Buffer Object，IBO
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // 放置到某种类型的槽位上
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); // 针对某种类型的槽位里面的东西做操作
 
-    // 不是必须使用VAO，这只是CPU->GPU的一个过程，画之前需要穿一次数据给GPU。这里预先传给GPU方便后续直接使用。
+    /**
+     * 当VAO被绑定时，任何对GL_ARRAY_BUFFER和GL_ELEMENT_ARRAY_BUFFER的绑定操作都会与当前VAO关联。
+     * 顶点属性指针的配置（如glVertexAttribPointer和glEnableVertexAttribArray）也会与当前VAO关联。
+     * 因此，只需配置一次VAO，后续绘制时只需重新绑定VAO，无需重复配置顶点属性指针和VBO绑定状态。
+     */
     unsigned int VAO; // 顶点数组对象：Vertex Array Object，VAO
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);  // 放置到某种类型的槽位上，直接通过函数名指定

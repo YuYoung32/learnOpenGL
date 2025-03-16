@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 23)
 add_subdirectory(thirdparty/glfw-3.4)
 add_subdirectory(thirdparty/glad)
 add_subdirectory(thirdparty/fmt-11.1.4)
+add_subdirectory(thirdparty/stb)
 
 # 包含各类头文件的目录
 include_directories(src)
@@ -22,4 +23,4 @@ file(GLOB_RECURSE SOURCE_FILES
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 
 # 链接GLFW库和OpenGL库
-target_link_libraries(${PROJECT_NAME} glfw glad fmt::fmt OpenGL::GL)
+target_link_libraries(${PROJECT_NAME} glfw glad fmt::fmt OpenGL::GL stb)
