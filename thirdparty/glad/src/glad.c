@@ -26,22 +26,24 @@
 #include <stdarg.h>
 
 void _pre_call_callback_default_gl(const char *name, void *funcptr, int len_args, ...) {
-    fprintf(stdout, "[OpenGLPreHook] %s called: ", name);
+    if (0) {
+        fprintf(stdout, "[OpenGLPreHook] %s called: ", name);
 
-    va_list args;
-    va_start(args, len_args);
+        va_list args;
+        va_start(args, len_args);
 
-    for (int i = 0; i < len_args; ++i) {
-        // 假设所有参数都是整数类型
-        int arg = va_arg(args, int);
-        fprintf(stdout, "%d", arg);
-        if (i < len_args - 1) {
-            fprintf(stdout, ", "); // 添加逗号和空格作为分隔符
+        for (int i = 0; i < len_args; ++i) {
+            // 假设所有参数都是整数类型
+            int arg = va_arg(args, int);
+            fprintf(stdout, "%d", arg);
+            if (i < len_args - 1) {
+                fprintf(stdout, ", "); // 添加逗号和空格作为分隔符
+            }
         }
-    }
 
-    fprintf(stdout, "\n"); // 换行符，结束行
-    va_end(args);
+        fprintf(stdout, "\n"); // 换行符，结束行
+        va_end(args);
+    }
     (void) name;
     (void) funcptr;
     (void) len_args;
