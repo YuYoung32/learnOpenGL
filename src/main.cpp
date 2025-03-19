@@ -8,9 +8,13 @@
 #include <gtc/type_ptr.hpp>
 #include <stb_image.h>
 
+float screenWidth = 800.f;
+float screenHeight = 600.f;
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    LOGI("called");
+    screenWidth = width;
+    screenHeight = height;
     glViewport(0, 0, width, height);
 }
 
@@ -149,13 +153,19 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // 设置状态：清除后的颜色是什么？
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glm::mat4 trans = glm::mat4(1.0f);
-        // 沿着Z轴旋转一定角度
-        trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        // 偏移
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-        unsigned int transformLoc = glGetUniformLocation(shader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        glm::mat4 model(1.f);
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        glm::mat4 view(1.f);
+        // 注意，我们将矩阵向我们要进行移动场景的反方向移动。
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+        glm::mat4 projection(1.f);
+        projection = glm::perspective(glm::radians(45.0f), screenWidth / screenHeight, 0.1f, 100.0f);
+
+        shader.setMatrix4f("model", model);
+        shader.setMatrix4f("view", view);
+        shader.setMatrix4f("projection", projection);
 
         //        glBindTexture(GL_TEXTURE_2D, texture0);
         glBindVertexArray(VAO);
