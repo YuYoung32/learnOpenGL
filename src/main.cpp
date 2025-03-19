@@ -3,6 +3,9 @@
 #include <GLFW/glfw3.h>
 #include "MyLog.h"
 #include "utils/ShaderUtils.h"
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 #include <stb_image.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -134,6 +137,7 @@ int main()
     shader.setInt("texture1", 0); // 0代表GL_TEXTURE0
     shader.setInt("texture2", 1); // 1代表GL_TEXTURE0
 
+    glfwSwapInterval(1);
     while (!glfwWindowShouldClose(window)) {
         // 输入
         processInput(window);
@@ -145,7 +149,15 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // 设置状态：清除后的颜色是什么？
         glClear(GL_COLOR_BUFFER_BIT);
 
-//        glBindTexture(GL_TEXTURE_2D, texture0);
+        glm::mat4 trans = glm::mat4(1.0f);
+        // 沿着Z轴旋转一定角度
+        trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        // 偏移
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        unsigned int transformLoc = glGetUniformLocation(shader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+        //        glBindTexture(GL_TEXTURE_2D, texture0);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
                        0); // glDrawElements 会使用glBindVertexArray和GL_ELEMENT_ARRAY_BUFFER 这两个槽位里的东西
