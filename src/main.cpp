@@ -10,6 +10,16 @@
 
 float screenWidth = 800.f;
 float screenHeight = 600.f;
+/**
+ *    ^x
+ *    |
+ *    |------->y
+ *   /
+ *  /z
+ */
+glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f); // 摄像机位置
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // 摄像机朝向
+glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f); // 摄像机上向量, 代表旋转
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -23,6 +33,19 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+    float cameraSpeed = 0.05f; // adjust accordingly
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) // 向里
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) // 向外
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) // 向左
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) // 向右
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // 向上
+        cameraPos += cameraSpeed * cameraUp;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) // 向下
+        cameraPos -= cameraSpeed * cameraUp;
 }
 
 
@@ -159,10 +182,7 @@ int main()
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-        float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glm::mat4 projection = glm::perspective(glm::radians(80.0f), screenWidth / screenHeight, 0.1f, 100.0f);
         shader.setMatrix4f("view", view);
         shader.setMatrix4f("projection", projection);
