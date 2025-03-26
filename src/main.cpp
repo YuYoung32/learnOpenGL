@@ -17,9 +17,9 @@ float screenHeight = 600.f;
  *   /
  *  /z
  */
-glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f); // 摄像机位置
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // 摄像机位置
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // 摄像机朝向
-glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f); // 摄像机上向量, 代表旋转
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // 摄像机上向量, 代表旋转
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -48,6 +48,56 @@ void processInput(GLFWwindow *window)
         cameraPos -= cameraSpeed * cameraUp;
 }
 
+float lastX = 400, lastY = 300;
+float yaw = 0, pitch = 0;
+bool firstMouse = true;
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
+    // 发黄磊校招
+    // 部门入职课程
+    // 具体流程是什么, 要找哪个主管？
+    if (firstMouse) // 这个bool变量初始时是设定为true的
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // 注意这里是相反的，因为y坐标是从底部往顶部依次增大的
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.05f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+    pitch = std::clamp(pitch, -45.f, 45.f);
+    yaw = std::clamp(pitch, -45.f, 45.f);
+
+    // 通过更改基坐标系达成旋转效果
+    glm::vec3 front;
+    front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+    front.y = sin(glm::radians(pitch));
+    front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+
+    cameraFront = glm::normalize(front);
+}
+
+float fov = 22.5f;
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    if (fov >= 1.0f && fov <= 45.0f)
+        fov -= yoffset;
+    if (fov <= 1.0f)
+        fov = 1.0f;
+    if (fov >= 45.0f)
+        fov = 45.0f;
+}
+
 
 int main()
 {
@@ -70,6 +120,10 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // 防止鼠标焦点移出去
+    glfwSetCursorPosCallback(window, mouse_callback); // 鼠标事件回调
+    glfwSetScrollCallback(window, scroll_callback);; // 滚轮事件回调
+    glfwSwapInterval(1);
 
     Shader shader{"../src/VertexShader.glsl", "../src/FragmentShader.glsl"};
     shader.use();
@@ -147,7 +201,6 @@ int main()
     shader.setInt("texture1", 0); // 0代表GL_TEXTURE0
     shader.setInt("texture2", 1); // 1代表GL_TEXTURE0
 
-    glfwSwapInterval(1);
     glEnable(GL_DEPTH_TEST);
 
     glm::vec3 cubePositions[] = {
@@ -183,7 +236,7 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glm::mat4 projection = glm::perspective(glm::radians(80.0f), screenWidth / screenHeight, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(fov), screenWidth / screenHeight, 0.1f, 100.0f);
         shader.setMatrix4f("view", view);
         shader.setMatrix4f("projection", projection);
 
