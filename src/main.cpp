@@ -159,12 +159,11 @@ int main()
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
-        glm::mat4 view(1.f);
-        // 注意，我们将矩阵向我们要进行移动场景的反方向移动。
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        glm::mat4 projection(1.f);
-        projection = glm::perspective(glm::radians(80.0f), screenWidth / screenHeight, 0.1f, 100.0f);
+        float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        glm::mat4 projection = glm::perspective(glm::radians(80.0f), screenWidth / screenHeight, 0.1f, 100.0f);
         shader.setMatrix4f("view", view);
         shader.setMatrix4f("projection", projection);
 
