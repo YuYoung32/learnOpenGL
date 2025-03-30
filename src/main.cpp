@@ -49,14 +49,11 @@ void processInput(GLFWwindow *window)
 }
 
 float lastX = 400, lastY = 300;
-float yaw = 0, pitch = 0;
+float yaw = -90, pitch = 0; // yaw 设为90是因为根据我们的坐标系转换, 如果yao是0的话, cameraFront会是 (1,0,0)
 bool firstMouse = true;
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 {
-    // 发黄磊校招
-    // 部门入职课程
-    // 具体流程是什么, 要找哪个主管？
     if (firstMouse) // 这个bool变量初始时是设定为true的
     {
         lastX = xpos;
@@ -74,8 +71,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 
     yaw += xoffset;
     pitch += yoffset;
-    pitch = std::clamp(pitch, -45.f, 45.f);
-    yaw = std::clamp(pitch, -45.f, 45.f);
+    pitch = std::clamp(pitch, -89.f, 89.f);
 
     // 通过更改基坐标系达成旋转效果
     glm::vec3 front;
@@ -226,6 +222,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // 设置状态：清除后的颜色是什么？
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        auto center = cameraPos + cameraFront; // 标量相加, 相当于direction直接进行坐标变化, 确保相机位置移动的过程中, 看到的目标位置也移动, 我们预期是相机不会锁定一直看某个地方
+        glm::mat4 view = glm::lookAt(cameraPos,   center, cameraUp);
+        glm::mat4 projection = glm::perspective(glm::radians(fov), screenWidth / screenHeight, 0.1f, 100.0f);
+        shader.setMatrix4f("view", view);
+        shader.setMatrix4f("projection", projection);
+
+
         for (unsigned int i = 0; i < 10; i++) {
             glm::mat4 model(1.f);
             model = glm::translate(model, cubePositions[i]);
@@ -235,10 +238,6 @@ int main()
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glm::mat4 projection = glm::perspective(glm::radians(fov), screenWidth / screenHeight, 0.1f, 100.0f);
-        shader.setMatrix4f("view", view);
-        shader.setMatrix4f("projection", projection);
 
         // 检查并调用事件，交换缓冲
         glfwPollEvents();
