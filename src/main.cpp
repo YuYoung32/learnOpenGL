@@ -21,15 +21,13 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // 摄像机位置
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // 摄像机朝向
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // 摄像机上向量, 代表旋转
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
-{
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     screenWidth = width;
     screenHeight = height;
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window)
-{
+void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -52,8 +50,7 @@ float lastX = 400, lastY = 300;
 float yaw = -90, pitch = 0; // yaw 设为90是因为根据我们的坐标系转换, 如果yao是0的话, cameraFront会是 (1,0,0)
 bool firstMouse = true;
 
-void mouse_callback(GLFWwindow *window, double xpos, double ypos)
-{
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
     if (firstMouse) // 这个bool变量初始时是设定为true的
     {
         lastX = xpos;
@@ -84,8 +81,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 
 float fov = 22.5f;
 
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
-{
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     if (fov >= 1.0f && fov <= 45.0f)
         fov -= yoffset;
     if (fov <= 1.0f)
@@ -95,8 +91,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 }
 
 
-int main()
-{
+int main() {
     // 使用GLFW前需要init
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -121,123 +116,109 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);; // 滚轮事件回调
     glfwSwapInterval(1);
 
-    Shader shader{"../src/VertexShader.glsl", "../src/FragmentShader.glsl"};
-    shader.use();
-
-    // VAO用来配置顶点的属性, 本身并不存储顶点
-    unsigned int VAO; // 顶点数组对象：Vertex Array Object，VAO
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);  // 放置到某种类型的槽位上，直接通过函数名指定
-
+    Shader cubeShader{"../src/CubeVertexShader.glsl", "../src/CubeFragmentShader.glsl"};
+    Shader lampShader{"../src/LampVertexShader.glsl", "../src/LampFragmentShader.glsl"};
     // VBO
     float vertices[] = {
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, 0.5f, -0.5f,
+        0.5f, 0.5f, -0.5f,
+        -0.5f, 0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
 
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-            -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f,
+        0.5f, -0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f,
+        -0.5f, -0.5f, 0.5f,
 
-            -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f,
 
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f,
+        0.5f, 0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
 
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, 0.5f,
+        0.5f, -0.5f, 0.5f,
+        -0.5f, -0.5f, 0.5f,
+        -0.5f, -0.5f, -0.5f,
 
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
+        -0.5f, 0.5f, -0.5f,
+        0.5f, 0.5f, -0.5f,
+        0.5f, 0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f, -0.5f
     };
-    // 不是必须使用VBO，这只是CPU->GPU的一个过程，画之前需要穿一次数据给GPU。这里预先传给GPU方便后续直接使用。
-    unsigned int VBO; // 顶点缓冲对象：Vertex Buffer Object，VBO
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // 放置到某种类型的槽位上
+    unsigned int cubeVBO; // 顶点缓冲对象：Vertex Buffer Object，VBO
+    glGenBuffers(1, &cubeVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // 针对某种类型的槽位里面的东西做操作
 
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
+
+    unsigned int cubeVAO;
+    glGenVertexArrays(1, &cubeVAO);
+    glBindVertexArray(cubeVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *) 0);
     glEnableVertexAttribArray(0);
-    // texture0 coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
-    auto texture0 = TextureUtils::Load2DTexture("../src/assets/container.jpg");
-    auto texture1 = TextureUtils::Load2DTexture("../src/assets/awesomeface.png");
-
-    glActiveTexture(GL_TEXTURE0); // 在绑定纹理之前先激活纹理单元
-    glBindTexture(GL_TEXTURE_2D, texture0);
-    glActiveTexture(GL_TEXTURE1); // 在绑定纹理之前先激活纹理单元
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    shader.setInt("texture1", 0); // 0代表GL_TEXTURE0
-    shader.setInt("texture2", 1); // 1代表GL_TEXTURE0
+    unsigned int lampVAO;
+    glGenVertexArrays(1, &lampVAO);
+    glBindVertexArray(lampVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
 
-    glm::vec3 cubePositions[] = {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(2.0f, 5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3(2.4f, -0.4f, -3.5f),
-            glm::vec3(-1.7f, 3.0f, -7.5f),
-            glm::vec3(1.3f, -2.0f, -2.5f),
-            glm::vec3(1.5f, 2.0f, -2.5f),
-            glm::vec3(1.5f, 0.2f, -1.5f),
-            glm::vec3(-1.3f, 1.0f, -1.5f)
-    };
     while (!glfwWindowShouldClose(window)) {
         // 输入
         processInput(window);
 
-        // 线框模式
-//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-//        glViewport(0, 0, 800, 600); // 由回调自动分配
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // 设置状态：清除后的颜色是什么？
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        auto center = cameraPos + cameraFront; // 标量相加, 相当于direction直接进行坐标变化, 确保相机位置移动的过程中, 看到的目标位置也移动, 我们预期是相机不会锁定一直看某个地方
-        glm::mat4 view = glm::lookAt(cameraPos,   center, cameraUp);
+        auto center = cameraPos + cameraFront;
+        // 标量相加, 相当于direction直接进行坐标变化, 确保相机位置移动的过程中, 看到的目标位置也移动, 我们预期是相机不会锁定一直看某个地方
+        glm::mat4 view = glm::lookAt(cameraPos, center, cameraUp);
         glm::mat4 projection = glm::perspective(glm::radians(fov), screenWidth / screenHeight, 0.1f, 100.0f);
-        shader.setMatrix4f("view", view);
-        shader.setMatrix4f("projection", projection);
 
 
-        for (unsigned int i = 0; i < 10; i++) {
-            glm::mat4 model(1.f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            shader.setMatrix4f("model", model);
+        // cube
+        cubeShader.use();
+        cubeShader.setVec3("objectColor", {1.0f, 0.5f, 0.31f});
+        cubeShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f});
+        glm::mat4 model = glm::mat4(1.0f);
+        cubeShader.setMat4("model", model);
+        cubeShader.setMat4("view", view);
+        cubeShader.setMat4("projection", projection);
+        glBindVertexArray(cubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        // lamp
+        lampShader.use();
+        lampShader.setMat4("projection", projection);
+        lampShader.setMat4("view", view);
+        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        lampShader.setMat4("model", model);
+        cubeShader.setMat4("view", view);
+        cubeShader.setMat4("projection", projection);
+        glBindVertexArray(lampVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // 检查并调用事件，交换缓冲
         glfwPollEvents();

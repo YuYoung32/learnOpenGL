@@ -50,6 +50,10 @@ Vertex Array Buffer, 说是顶点数组Buffer，其实更像一个管理器。VA
 在上下文bind一个VAO的情况下，后续bind的VBO和EBO会追加到这个VAO上（不能颠倒顺序，必须先bind
 VAO）。因此在draw前bind一个VAO就可以了！无需再bind一堆buffer。使用OpenGL的核心模式时，在draw之前**必须**要bind一个VAO。
 
+VBO不是为VAO而生, 可以在bind VBO后调用`glVertexAttribPointer`把VBO内的数据放到VAO里.
+
+一个VAO可以使用多个VBO的数据, 一个VBO也可以被多个VAO使用.
+
 VAO的管理结构如下：
 
 ![VAO](https://learnopengl-cn.github.io/img/01/04/vertex_array_objects_ebo.png)
