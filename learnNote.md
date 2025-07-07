@@ -77,6 +77,65 @@ glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 *
 glEnableVertexAttribArray(2);
 ```
 
+### 向Shader传递数据的方式
+
+1. 通过绑定VAO然后自动读取`GL_ARRAY_BUFFER`槽位，通过layout自动绑定位置。
+
+   ```c++
+   // 创建和绑定一个 VBO（存储顶点位置）
+   GLuint positionVBO;
+   glGenBuffers(1, &positionVBO);
+   glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+   
+   // 创建 VAO
+   GLuint vao;
+   glGenVertexArrays(1, &vao);
+   glBindVertexArray(vao);
+   
+   // 设置顶点属性指针（位置属性）
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+   glEnableVertexAttribArray(0);
+   ```
+
+   ```glsl
+   #version 330 core
+   layout(location = 0) in vec3 aPos; // 顶点属性
+   void main() {
+       gl_Position = vec4(aPos, 1.0);
+   }
+   ```
+
+2. 通过uniform
+
+   ```c++
+   GLuint shaderProgram = ...; // 已经编译和链接的着色器程序
+   glUseProgram(shaderProgram);
+   
+   GLuint uniformPosLoc = glGetUniformLocation(shaderProgram, "uniformPosition");
+   glUniform3f(uniformPosLoc, 0.0f, 0.5f, 0.0f); // 设置 uniform 的值
+   ```
+
+   ```glsl
+   #version 330 core
+   uniform vec3 uniformPosition; // 使用 uniform 变量
+   void main() {
+       gl_Position = vec4(uniformPosition, 1.0);
+   }
+   ```
+
+方式总结：
+
+| **传递方式**                      | **描述**                                                     | **特点**                                                     | **适用场景**                                                 |
+| --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **顶点属性 (Vertex Attribute)**   | 每个顶点的独立属性，例如位置、法线、颜色、纹理坐标等。       | - 数据与每个顶点一一对应<br>- 通过 VBO（顶点缓冲对象）提供<br>- 使用 `layout(location)` 标记 | 用于逐个顶点数据，例如顶点坐标、法线、纹理坐标等。           |
+| **统一变量 (Uniform)**            | 所有顶点共享的全局变量，例如变换矩阵、光照参数等。           | - 每帧或每次绘制调用可以更改<br>- 全局共享值<br>- 使用 `glUniform` 设置 | 用于传递每帧不变的全局数据，例如模型矩阵、视图矩阵、光照方向等。 |
+| **常量 (Constants)**              | 着色器中的硬编码变量。                                       | - 值固定，不能动态修改<br>- 直接在着色器中定义               | 用于固定的参数或标志，例如比例因子、常量参数等。             |
+| **纹理 (Texture)**                | 使用纹理存储相关数据，通过采样器读取（如高度图、法线贴图、顶点位置信息）。 | - 可以存储大量数据<br>- 数据通常是图像或二维数组<br>- 顶点着色器中通过 `sampler` 和 `texture()` 访问 | 用于地形高度图、法线贴图或其他需要通过二维纹理查找的数据。   |
+| **着色器存储缓冲对象 (SSBO)**     | 存储大量动态数据的缓冲对象，可在着色器中直接读取或写入。     | - 适用于大量数据<br>- 支持动态读取和写入<br>- 需要 OpenGL 4.3 及以上版本 | 用于存储和访问大量动态数据，例如实例化渲染、复杂的变换矩阵或大规模结构化数据。 |
+| **纹理缓冲对象 (TBO)**            | 一种特殊类型的缓冲对象，以纹理形式访问大规模数据（类似 SSBO，但使用纹理 API）。 | - 数据通过纹理单元访问<br>- 和 SSBO 类似，但兼容性更强       | 用于大规模数据，例如离散采样点、顶点属性或动态索引的缓冲数据。 |
+| **实例属性 (Instance Attribute)** | 在实例化渲染中，为每个实例传递独立的属性，例如每个实例的变换矩阵、颜色等。 | - 适用于实例化渲染<br>- 使用 `glVertexAttribDivisor` 设置更新频率 | 用于实例化渲染，例如场景中每个对象的独立变换矩阵或颜色。     |
+
 ## Texture
 
 from [learnOpenGL-CN](https://learnopengl-cn.github.io/01%20Getting%20started/06%20Textures/)
@@ -161,3 +220,13 @@ yaw 偏航角
 roll 翻滚角
 
 ![欧拉角](https://learnopengl-cn.github.io/img/01/09/camera_pitch_yaw_roll.png)
+
+## 光照
+
+光照无法完全模拟，要很多近似模型。其中一个模型被称为风氏光照模型(Phong Lighting Model)。风氏光照模型的主要结构由3个分量组成：环境(Ambient)、漫反射(Diffuse)和镜面(Specular)光照。下面这张图展示了这些光照分量看起来的样子：
+
+![Phine Mix](https://learnopengl-cn.github.io/img/02/02/basic_lighting_phong.png)
+
+- 环境光照(Ambient Lighting)：即使在黑暗的情况下，世界上通常也仍然有一些光亮（月亮、远处的光），所以物体几乎永远不会是完全黑暗的。为了模拟这个，我们会使用一个环境光照常量，它永远会给物体一些颜色。环境光在物体四面都有，是真正的环境。
+- 漫反射光照(Diffuse Lighting)：模拟光源对物体的方向性影响(Directional Impact)。它是风氏光照模型中视觉上最显著的分量。物体的某一部分越是正对着光源（接近法线），它就会越亮。
+- 镜面光照(Specular Lighting)：模拟有光泽物体上面出现的亮点。镜面光照的颜色相比于物体的颜色会更倾向于光的颜色。
