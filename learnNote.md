@@ -208,6 +208,14 @@ OpenGL坐标系是右手坐标系
 
 ![](https://learnopengl-cn.github.io/img/01/08/coordinate_systems_right_handed.png)
 
+
+
+## 视角空间转换过程
+
+![](https://learnopengl-cn.github.io/img/01/08/coordinate_systems.png)
+
+
+
 ## LookAt矩阵原理
 
 ![](https://learnopengl-cn.github.io/img/01/09/camera_axes.png)
@@ -223,10 +231,21 @@ roll 翻滚角
 
 ## 光照
 
-光照无法完全模拟，要很多近似模型。其中一个模型被称为风氏光照模型(Phong Lighting Model)。风氏光照模型的主要结构由3个分量组成：环境(Ambient)、漫反射(Diffuse)和镜面(Specular)光照。下面这张图展示了这些光照分量看起来的样子：
+光照无法完全模拟，只有近似模型。其中一个模型被称为风氏光照模型(Phong Lighting Model)。风氏光照模型的主要结构由3个分量组成：环境(Ambient)、漫反射(Diffuse)和镜面(Specular)光照。下面这张图展示了这些光照分量看起来的样子：
 
 ![Phine Mix](https://learnopengl-cn.github.io/img/02/02/basic_lighting_phong.png)
 
 - 环境光照(Ambient Lighting)：即使在黑暗的情况下，世界上通常也仍然有一些光亮（月亮、远处的光），所以物体几乎永远不会是完全黑暗的。为了模拟这个，我们会使用一个环境光照常量，它永远会给物体一些颜色。环境光在物体四面都有，是真正的环境。
-- 漫反射光照(Diffuse Lighting)：模拟光源对物体的方向性影响(Directional Impact)。它是风氏光照模型中视觉上最显著的分量。物体的某一部分越是正对着光源（接近法线），它就会越亮。
-- 镜面光照(Specular Lighting)：模拟有光泽物体上面出现的亮点。镜面光照的颜色相比于物体的颜色会更倾向于光的颜色。
+- 漫反射光照(Diffuse Lighting)：模拟光源对物体的方向性影响(Directional Impact)。它是风氏光照模型中视觉上最显著的分量。**物体的某一部分越是正对着光源（接近法线），它就会越亮。**
+- 镜面光照(Specular Lighting)：模拟有光泽物体上面出现的亮点。镜面光照的颜色相比于物体的颜色会更倾向于光的颜色。**视线的某一部分越是正对着点的法线，镜面效果越强**
+
+关注对法向量的处理：
+
+1. 法向量应使用World Space坐标系，因为需要和世界中其他元素做运算
+
+2. 法向量应当对物体的变换做变化，但是变化和物体矩阵不同，因为物体模型进行位移和拉伸后会改变，法向量按照这样改变后变不会垂直与面。法线的变换矩阵是模型矩阵的inverse的transpose。
+
+   ![](https://learnopengl-cn.github.io/img/02/02/basic_lighting_normal_transformation.png)
+
+
+

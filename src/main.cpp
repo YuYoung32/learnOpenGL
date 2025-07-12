@@ -1,3 +1,4 @@
+#include <complex>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -120,47 +121,47 @@ int main() {
     Shader lampShader{"../src/LampVertexShader.glsl", "../src/LampFragmentShader.glsl"};
     // VBO
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-       -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-       -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
 
-       -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-       -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-       -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
 
-       -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-       -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-       -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-       -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-       -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-       -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
 
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
 
-       -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-       -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-       -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
 
-       -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-       -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-       -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f
     };
     unsigned int cubeVBO; // 顶点缓冲对象：Vertex Buffer Object，VBO
     glGenBuffers(1, &cubeVBO);
@@ -172,23 +173,26 @@ int main() {
     glGenVertexArrays(1, &cubeVAO);
     glBindVertexArray(cubeVAO);
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
     glEnableVertexAttribArray(0);
     // normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) (3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     unsigned int lampVAO;
     glGenVertexArrays(1, &lampVAO);
     glBindVertexArray(lampVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
 
+    float loopCounter = 0;
     while (!glfwWindowShouldClose(window)) {
         // 输入
         processInput(window);
+
+        loopCounter++;
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // 设置状态：清除后的颜色是什么？
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -202,9 +206,7 @@ int main() {
 
         // lamp
         lampShader.use();
-        lampShader.setMat4("projection", projection);
-        lampShader.setMat4("view", view);
-        glm::vec3 lightPos(1.2f, 1.0f, 2.0f); // 灯的世界位置
+        glm::vec3 lightPos(2 * std::cos(loopCounter / 360 * M_PI), 0, 2 * std::sin(loopCounter / 360 * M_PI)); // 灯的世界位置, 绕原点圆周运动
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
@@ -216,13 +218,15 @@ int main() {
 
         // cube
         cubeShader.use();
-        cubeShader.setVec3("objectColor", {1.0f, 0.5f, 0.31f});
-        cubeShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f});
-        cubeShader.setVec3("lightPos", lightPos);
+        cubeShader.setVec3("objectColor", {1.0f, 0.5f, 0.31f}); // 物体本身的颜色
+        cubeShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f}); // 灯光颜色
+        cubeShader.setVec3("lightPos", lightPos); // 灯光位置
+        cubeShader.setVec3("viewPos", cameraPos);
         model = glm::mat4(1.0f);
+        model = glm::rotate(model, loopCounter / 100, glm::vec3(0, 1, 1));
         cubeShader.setMat4("model", model);
-        cubeShader.setMat4("view", view);
-        cubeShader.setMat4("projection", projection);
+        cubeShader.setMat4("view", view); // 复用观察位置
+        cubeShader.setMat4("projection", projection); // 复用视角投影矩阵v
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
