@@ -218,9 +218,14 @@ int main() {
 
         // cube
         cubeShader.use();
-        cubeShader.setVec3("objectColor", {1.0f, 0.5f, 0.31f}); // 物体本身的颜色
-        cubeShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f}); // 灯光颜色
-        cubeShader.setVec3("lightPos", lightPos); // 灯光位置
+        cubeShader.setVec3("material.ambient", {1.0f, 0.5f, 0.31f});
+        cubeShader.setVec3("material.diffuse", {1.0f, 0.5f, 0.31f});
+        cubeShader.setVec3("material.specular", {0.5f, 0.5f, 0.5f});
+        cubeShader.setFloat("material.shininess", 32.0f);
+        cubeShader.setVec3("light.ambient", {0.5f * std::cos(loopCounter / 360 * M_PI), 0.5f * std::cos(loopCounter / 360 * M_PI), 0.2f});
+        cubeShader.setVec3("light.diffuse", {0.5f, 0.5f, 0.5f}); // 将光照调暗了一些以搭配场景
+        cubeShader.setVec3("light.specular", {1.0f, 1.0f, 1.0f});
+        cubeShader.setVec3("light.position", lightPos); // 灯光位置
         cubeShader.setVec3("viewPos", cameraPos);
         model = glm::mat4(1.0f);
         model = glm::rotate(model, loopCounter / 100, glm::vec3(0, 1, 1));
