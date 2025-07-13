@@ -1,9 +1,9 @@
 #version 330 core
 
 struct Material {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+// ambient和diffuse相同
+    sampler2D diffuse;// 相当于一个map 从纹理坐标取diffuse值达到更加精细的控制光线, amibient通常和diffuse相同
+    sampler2D specular;
     float shininess;
 };
 
@@ -25,11 +25,12 @@ uniform vec3 viewPos;
 
 in vec3 Normal;
 in vec3 FragPos;
+in vec2 TexCoords;
 
 void main()
 {
     // 环境光
-    vec3 ambient = light.ambient * material.ambient;
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
 
     // 法线
     vec3 norm = normalize(Normal);
@@ -37,7 +38,7 @@ void main()
     vec3 lightDir = normalize(light.position - FragPos);
     // 计算衰减
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * (diff * material.diffuse);
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
 
     // 镜面反射
     // 观察者到点的朝向
@@ -45,8 +46,8 @@ void main()
     // 观察者到点到朝向根据法向量进行反射
     vec3 reflectDir = reflect(-lightDir, norm);
     // 观察者角度越接近法向镜面效果越强
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess); // 后面的幂指数加强镜面的衰减程度
-    vec3 specular = light.specular * (spec * material.specular);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);// 后面的幂指数加强镜面的衰减程度
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
 
     // 环境光+漫反射光
     vec3 result = (ambient + diffuse + specular);

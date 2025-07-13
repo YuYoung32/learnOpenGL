@@ -247,7 +247,9 @@ roll 翻滚角
 
    ![](https://learnopengl-cn.github.io/img/02/02/basic_lighting_normal_transformation.png)
 
-针对风氏模型可以这样写FragmentShader，可以比较清晰的定义灯光相关的材质的情况和灯光情况。
+
+
+针对风氏模型可以这样写FragmentShader，可以比较清晰的定义灯光相关的材质的情况和灯光情况。后续可以传入`sampler2D`作为map查找每个像素点的分量值，使用内置函数`texture`可以达到采样目的。
 
 ```glsl
 #version 330 core
