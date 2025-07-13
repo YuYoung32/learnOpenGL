@@ -10,7 +10,8 @@ struct Material {
 uniform Material material;
 
 struct Light {
-    vec3 position;
+//    vec3 position;
+    vec3 direction;
 
     vec3 ambient;
     vec3 diffuse;
@@ -30,15 +31,15 @@ in vec2 TexCoords;
 void main()
 {
     // 环境光
-    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+    vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
 
     // 法线
     vec3 norm = normalize(Normal);
     // 光线方向
-    vec3 lightDir = normalize(light.position - FragPos);
+    vec3 lightDir = normalize(-light.direction);
     // 计算衰减
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+    vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;
 
     // 镜面反射
     // 观察者到点的朝向
@@ -47,7 +48,7 @@ void main()
     vec3 reflectDir = reflect(-lightDir, norm);
     // 观察者角度越接近法向镜面效果越强
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);// 后面的幂指数加强镜面的衰减程度
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+    vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;
 
     // 环境光+漫反射光
     vec3 result = (ambient + diffuse + specular);

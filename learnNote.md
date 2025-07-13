@@ -308,5 +308,7 @@ void main()
 }
 ```
 
+### 平行光
 
+平行光来自于无穷远的光源，或者说有无数个点光源，每一个点都有自己光源。此时light.position==light.direction。
 
