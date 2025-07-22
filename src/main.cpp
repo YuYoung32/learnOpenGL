@@ -241,10 +241,14 @@ int main() {
         // 漫反射使用贴图
         // 镜面反射使用贴图
         cubeShader.setFloat("material.shininess", 32.0f);
+        cubeShader.setVec3("light.position", lightPos);
         cubeShader.setVec3("light.direction", {0, -1.0f, 0});
         cubeShader.setVec3("light.ambient", {0.2f, 0.2f, 0.2f});
         cubeShader.setVec3("light.diffuse", {0.5f, 0.5f, 0.5f});
         cubeShader.setVec3("light.specular", {1.0f, 1.0f, 1.0f});
+        cubeShader.setFloat("light.constant",  1.0f);
+        cubeShader.setFloat("light.linear",    0.22f);
+        cubeShader.setFloat("light.quadratic", 0.20f);
         cubeShader.setVec3("viewPos", cameraPos);
 
         glActiveTexture(GL_TEXTURE0);

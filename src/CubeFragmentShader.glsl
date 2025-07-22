@@ -10,12 +10,16 @@ struct Material {
 uniform Material material;
 
 struct Light {
-//    vec3 position;
-    vec3 direction;
+    vec3 position;
+    vec3 direction;// 平行光专用 点光源的光线方向是根据每个点计算的
 
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    float constant;// 衰减系数, 点光源专用
+    float linear;// 衰减系数, 点光源专用
+    float quadratic;// 衰减系数, 点光源专用
 };
 
 uniform Light light;
@@ -30,13 +34,16 @@ in vec2 TexCoords;
 
 void main()
 {
+    float distance = length(light.position - FragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance +light.quadratic * (distance * distance));
+
     // 环境光
     vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
 
     // 法线
     vec3 norm = normalize(Normal);
     // 光线方向
-    vec3 lightDir = normalize(-light.direction);
+    vec3 lightDir = normalize((light.position - FragPos));
     // 计算衰减
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;
@@ -50,7 +57,10 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);// 后面的幂指数加强镜面的衰减程度
     vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;
 
-    // 环境光+漫反射光
+    // 所有光受到距离限制进行衰减
+    ambient  *= attenuation;
+    diffuse  *= attenuation;
+    specular *= attenuation;
     vec3 result = (ambient + diffuse + specular);
     FragColor = vec4(result, 1.0);
 }
