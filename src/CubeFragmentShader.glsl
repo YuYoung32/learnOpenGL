@@ -12,6 +12,8 @@ uniform Material material;
 struct Light {
     vec3 position;
     vec3 direction;// 平行光专用 点光源的光线方向是根据每个点计算的
+    float cutOff;// 聚光(一种特殊的点光源) 专用
+    float outerCutOff;// 聚光(一种特殊的点光源) 专用, 外切角, 用于做聚光模糊
 
     vec3 ambient;
     vec3 diffuse;
@@ -34,8 +36,6 @@ in vec2 TexCoords;
 
 void main()
 {
-    float distance = length(light.position - FragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance +light.quadratic * (distance * distance));
 
     // 环境光
     vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
@@ -43,10 +43,20 @@ void main()
     // 法线
     vec3 norm = normalize(Normal);
     // 光线方向
-    vec3 lightDir = normalize((light.position - FragPos));
+    vec3 lightDir = normalize(FragPos - light.position);
+    float theta = dot(lightDir, normalize(-light.position));
+    if (theta > light.outerCutOff) {
+        // 角度大于锥体 在聚光之外
+        FragColor = vec4(light.ambient * vec3(texture(material.diffuse, TexCoords)), 1.0);
+        return;
+    }
     // 计算衰减
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;
+
+    // 做差值以实现聚光模糊
+    float epsilon   = light.cutOff - light.outerCutOff;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
     // 镜面反射
     // 观察者到点的朝向
@@ -58,9 +68,9 @@ void main()
     vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;
 
     // 所有光受到距离限制进行衰减
-    ambient  *= attenuation;
-    diffuse  *= attenuation;
-    specular *= attenuation;
+    ambient  *= intensity;
+    diffuse  *= intensity;
+    specular *= intensity;
     vec3 result = (ambient + diffuse + specular);
     FragColor = vec4(result, 1.0);
 }

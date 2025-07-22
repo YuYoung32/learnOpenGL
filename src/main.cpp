@@ -249,6 +249,8 @@ int main() {
         cubeShader.setFloat("light.constant",  1.0f);
         cubeShader.setFloat("light.linear",    0.22f);
         cubeShader.setFloat("light.quadratic", 0.20f);
+        cubeShader.setFloat("light.cutOff",   glm::cos(glm::radians(12.5f)));
+        cubeShader.setFloat("light.outerCutOff",   glm::cos(glm::radians(17.5f)));
         cubeShader.setVec3("viewPos", cameraPos);
 
         glActiveTexture(GL_TEXTURE0);
